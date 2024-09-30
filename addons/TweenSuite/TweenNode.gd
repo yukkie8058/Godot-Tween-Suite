@@ -54,6 +54,15 @@ const _EARLY_ERROR = "Method called too early, Tween not initialized. Use make_t
 ## The pause behavior of the [Tween]. See [enum Tween.TweenPauseMode].
 @export_enum("Bound", "Stop", "Process") var pause_mode: int
 
+## Emitted when the [Tween] has finished all tweening. See [signal Tween.finished].
+signal finished
+
+## Emitted when a full loop of the [Tween] is complete, providing the loop index. See [signal Tween.loop_finished].
+signal loop_finished(loop_count: int)
+
+## Emitted when one step of the [Tween] is complete, providing the step index. See [signal Tween.step_finished].
+signal step_finished(idx: int)
+
 var _tween: Tween
 
 ## Creates a reusable [Tween]. It will not go invalid once finished, which means you should call [method kill] to dispose it manually when it's no longer needed (this is done automatically when the tween is bound to a [Node]). If [param with_autostart] is [code]false[/code], the [Tween] will not be animating until you call [method Tween.play].
@@ -74,6 +83,10 @@ func make_tween():
 	
 	_tween = TweenNode.create_reusable_tween(autostart)
 	_tween.bind_node(self).set_process_mode(tween_process_mode).set_trans(default_transition).set_ease(default_easing).set_pause_mode(pause_mode).set_loops(loops).set_parallel(parallel).set_speed_scale(speed_scale)
+	
+	_tween.finished.connect(finished.emit)
+	_tween.loop_finished.connect(loop_finished.emit)
+	_tween.step_finished.connect(step_finished.emit)
 	
 	if animation:
 		_tween.set_parallel(false)
